@@ -3,8 +3,7 @@
   <div id="get-todo" class="container">
       <!-- <p>ToDo:</p>    -->
       <p>{{todo.project}}</p>  
-      <p>{{todo.title}}</p>  
-      <button></button>
+      <p>{{todo.title}}</p>       
       <hr>
       
       <!-- <li v-for="todo in todos" :key="todo.id">{{todo.title}}</li>    -->
@@ -33,3 +32,8 @@
         }
     }
 </script>
+<style>
+.delete-bnt{
+    font-size: 24px;
+}
+</style>
