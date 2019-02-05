@@ -4,9 +4,17 @@
     <button class="btn btn-primary" @click="addToDo">Add Todo</button>
     <!-- <GetTodo v-for="(todo, index) in todos" :todo="todo" :remove='removeToDo(index)' :key="todo.id"></GetTodo> -->
     <div v-for="(todo,index) in todos" :key="todo.id" class="todo-item">
-      <div>
-        {{todo.title}}
-      </div>
+      <li>
+          <input 
+            v-if="todo.edit" 
+            v-model='todo.title'
+            @blur="todo.edit = false; $emit('update')"
+            @keyup.enter="todo.edit=false; $emit('update')"            
+          >
+          <div v-else>
+            <label @click="todo.edit=true"> {{todo.title}} </label>
+          </div>
+      </li>    
       <div class="delete-bnt" @click="removeToDo(index)">&times;</div>
     </div>
   </div>
@@ -21,17 +29,20 @@ export default {
   },
   data() {
     return {
+      editedTodo: '',
       newToDo: "",
       idForToDo: 3,
       todos: [
         {
           id: 1,
           title: "Project A",
+          edit: false,
           done: false
         },
         {
           id: 2,
           title: "Project b",
+          edit: false,
           done: false
         }
       ]
@@ -45,15 +56,20 @@ export default {
       this.todos.push({
         id: this.idForToDo,
         title: this.newToDo,
+        edit: false,
         done: false
       });
       this.newToDo = "";
       this.idForToDo++;
     },
     removeToDo(index) {
-      this.todos.slice(index, 1);
-      // alert('asdasda')
+      this.todos.splice(index, 1);
+    },
+    editToDo(todo) {
+      console.log(index)
+       this.editedTodo = todo;
     }
-  }
+  },
+  
 };
 </script>
