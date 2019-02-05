@@ -1,75 +1,77 @@
-<template>
-  <div id="app" class="container">
-    <input class="form-control" v-model="newToDo" @keyup.enter="addToDo" placeholder="I need to...">
-    <button class="btn btn-primary" @click="addToDo">Add Todo</button>
-    <!-- <GetTodo v-for="(todo, index) in todos" :todo="todo" :remove='removeToDo(index)' :key="todo.id"></GetTodo> -->
-    <div v-for="(todo,index) in todos" :key="todo.id" class="todo-item">
-      <li>
+<template>  
+  <v-container grid-list-md text-xs-center>
+    <p class="display-2">MAKE YOUR OWN TO DO LIST</p>
+    <v-layout  align-center justify-center row>
+    <v-form lazy-validation v-model="valid" ref="form">
+    <v-text-field 
+      :rules="toDoRules"           
+      v-model="toDoModel"      
+      @keyup.enter.prevent="addTodo"
+      placeholder="I need to..."
+      required
+    ></v-text-field>
+    </v-form>
+    <v-btn 
+      :disabled='!valid' 
+      color="info" 
+      @click="addTodo">
+      Add Todo
+    </v-btn>    
+    </v-layout>
+    <div v-for="(todo,index) in todos" :key="todo.id">
+      <v-layout align-center justify-space-between row fill-height/>
+      <v-list>
+        <v-input>
           <input 
             v-if="todo.edit" 
             v-model='todo.title'
             @blur="todo.edit = false; $emit('update')"
             @keyup.enter="todo.edit=false; $emit('update')"            
-          >
-          <div v-else>
-            <label @click="todo.edit=true"> {{todo.title}} </label>
-          </div>
-      </li>    
-      <div class="delete-bnt" @click="removeToDo(index)">&times;</div>
+          >          
+            <label v-if="!todo.edit"  @click="todo.edit=true">
+              {{todo.title}}
+            </label>            
+          </v-input>   
+        </v-list>    
+       <v-btn @click="removeToDo(index)" class="headline" color="error">&times;</v-btn> 
+       <v-divider light></v-divider>             
+      </v-layout>
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script>
-import GetTodo from "../components/GetToDo.vue";
 
 export default {
-  components: {
-    GetTodo
-  },
-  data() {
+  name: 'Home',
+  data(){
     return {
-      editedTodo: '',
-      newToDo: "",
-      idForToDo: 3,
-      todos: [
-        {
-          id: 1,
-          title: "Project A",
-          edit: false,
-          done: false
-        },
-        {
-          id: 2,
-          title: "Project b",
-          edit: false,
-          done: false
-        }
-      ]
-    };
-  },
-  methods: {
-    addToDo() {
-      if (this.newToDo.trim().length == 0) {
-        return;
-      }
-      this.todos.push({
-        id: this.idForToDo,
-        title: this.newToDo,
-        edit: false,
-        done: false
-      });
-      this.newToDo = "";
-      this.idForToDo++;
-    },
-    removeToDo(index) {
-      this.todos.splice(index, 1);
-    },
-    editToDo(todo) {
-      console.log(index)
-       this.editedTodo = todo;
+      valid: true,
+      toDoRules:[              
+        v => !!v || `Enter yours task`,
+        v => (/.{5}/.test(v) || `Please enter over 5 symbols :)`)      
+      ],
+      toDoModel: ''
     }
   },
-  
+  methods: {    
+    addTodo() {
+      if(this.toDoModel !== '')
+      this.$store.dispatch('addTodo',this.toDoModel)          
+    },
+    removeToDo(index) {
+      this.$store.dispatch('removeToDo', index )
+    }  
+  },
+  computed: {   
+    todos(){
+      return this.$store.getters.todos
+    }
+  },
 };
 </script>
+<style>
+.delete-bnt{
+    font-size: 24px;
+} 
+</style>

@@ -5,95 +5,45 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    idForToDo: 3,
     todos: [
-      {
-      title: 'Todo A',
-      project: 'Project A',
-      done: false,
+      {        
+        title: "Project A",
+        edit: false,
+        done: false
       },
-      {
-      title: 'Todo B',
-      project: 'Project B',
-      done: true,
-      }, 
-      {
-      title: 'Todo C',
-      project: 'Project C',
-      done: false,
-      }, 
-      {
-      title: 'Todo D',
-      project: 'Project D',
-      done: false,
-      }, 
-      {
-      title: 'Todo D',
-      project: 'Project D',
-      done: false,
-      }, 
-      {
-      title: 'Todo D',
-      project: 'Project D',
-      done: false,
-      }, 
-      {
-      title: 'Todo D',
-      project: 'Project D',
-      done: false,
+      {       
+        title: "Project b",
+        edit: false,
+        done: false
       }
-    ],
-    newTodo: ''
+    ]
   },
-  mutations: {
-    GET_TODO(state, todo) {
-      state.newTodo = todo
-    },
-    ADD_TODO(state) {
-      state.todos.push({
-        body: state.newTodo,
-        completed: false
-      })
-    },
-    EDIT_TODO(state, todo) {
-      var todos = state.todos
-      todos.splice(todos.indexOf(todo), 1)
-      state.todos = todos
-      state.newTodo = todo.body
-    },
-    REMOVE_TODO(state, todo) {
-      var todos = state.todos
-      todos.splice(todos.indexOf(todo), 1)
-    },
-    COMPLETE_TODO(state, todo) {
-      todo.completed = !todo.completed
-    },
-    CLEAR_TODO(state) {
-      state.newTodo = ''
+  mutations: {  
+    ADD_TODO(state, payload) {
+      state.todos.push({       
+        title: payload,
+        edit: false,
+        done: false
+      })      
+    },  
+    REMOVE_TODO(state, index) {
+      let todos = state.todos
+      todos.splice(index, 1)
     }
   },
   actions: {
     getTodo({ commit }, todo) {
       commit('GET_TODO', todo)
     },
-    addTodo({ commit }) {
-      commit('ADD_TODO')
+    addTodo({ commit }, payload) {
+      commit('ADD_TODO', payload)
     },
-    editTodo({ commit }, todo) {
-      commit('EDIT_TODO', todo)
-    },
-    removeTodo({ commit }, todo) {
-      commit('REMOVE_TODO', todo)
-    },
-    completeTodo({ commit }, todo) {
-      commit('COMPLETE_TODO', todo)
-    },
-    clearTodo({ commit }) {
-      commit('CLEAR_TODO')
+    removeToDo({ commit }, index) {
+      commit('REMOVE_TODO', index)
     }
   },
-  getters: {
-    newTodo: state => state.newTodo,
-    todos: state => state.todos.filter((todo) => { return !todo.completed }),
-    completedTodos: state => state.todos.filter((todo) => { return todo.completed })
+  getters: {   
+    todos: state => state.todos.filter((todo) => { return !todo.completed }),    
   }
 })
