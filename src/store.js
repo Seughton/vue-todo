@@ -6,41 +6,41 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     idForToDo: 3,
-    todos: [
-      {        
-        title: "Project A",
-        edit: false,
-        done: false
-      },
-      {       
-        title: "Project b",
-        edit: false,
-        done: false
-      }
-    ]
+    todos: []
   },
   mutations: {  
     ADD_TODO(state, payload) {
       state.todos.push({       
         title: payload,
         edit: false,
-        done: false
+        done: false,
       })      
     },  
     REMOVE_TODO(state, index) {
       let todos = state.todos
       todos.splice(index, 1)
+    },
+    UPDATE_TODO(state, payload){
+      const todos = state.todos
+      todos.splice(payload.index, 1, {title: payload.todo, edit: false, done: false})
+    },
+    COMPLETE_TODO(state, payload){
+      const todos = state.todos
+      todos[payload.index].done = !todos[payload.index].done 
     }
   },
-  actions: {
-    getTodo({ commit }, todo) {
-      commit('GET_TODO', todo)
-    },
+  actions: {   
     addTodo({ commit }, payload) {
       commit('ADD_TODO', payload)
     },
     removeToDo({ commit }, index) {
       commit('REMOVE_TODO', index)
+    },
+    update({ commit }, payload) {           
+      commit('UPDATE_TODO', payload)
+    },
+    completeToDo({ commit }, payload){
+      commit('COMPLETE_TODO', payload)
     }
   },
   getters: {   
