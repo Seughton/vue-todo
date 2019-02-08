@@ -29,15 +29,15 @@
     </v-layout>  
     <v-data-table      
       :items="todos"
-      class="elevation-1"
+      class="elevation-1"      
       hide-actions
       hide-headers
     > 
     <template slot="items" slot-scope="props">      
-      <tr :class="{selected: props.item.done}"> 
+      <tr :class="{selected: props.item.done}" :key="props.index"> 
         <td class="text-xs-left">
         <span class="index-padding">
-          {{props.index}}
+          {{todos[props.index].id}}
         </span>
           {{props.item.title}}      
         </td>
@@ -53,6 +53,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 
 export default {
   name: 'Home',
@@ -67,38 +68,56 @@ export default {
       ],
       toDoModel: ''
     }
+  },
+  created() {
+    this.getTodosFromDB()
   },  
   methods: {
+    async getTodosFromDB(){
+      let uli = `http://localhost:3001/todos`;
+      await axios.get(uli).then((response) => {
+        console.log('response.data',response.data)
+        let todos = response.data;
+        this.$store.dispatch('getTodosFromDB', todos)   
+      })
+    },
     editToDo(todo,index){
       this.toDoModel = todo;
       this.index = index;
       this.edit = true     
     },
-    update(){        
-      if(this.toDoModel !== this.todos[this.index].title){
-        this.$store.dispatch('update', {index: this.index, todo: this.toDoModel})   
+    update(){   
+      let uli = `http://localhost:3001/updateTodo`;
+      if(this.toDoModel !== this.todos[this.index].title){       
+        axios.put(uli, { data: { index: this.todos[this.index].id, todo: this.toDoModel } })      
+        this.$store.dispatch('update', {index: this.index, todo: this.toDoModel})           
         this.edit = false;
         this.toDoModel = ''
       }
     },
-    completeToDo(isDone, index){
-      // console.log(isDone, index)
+    completeToDo(isDone, index){     
       this.$store.dispatch('completeToDo',{isDone: isDone, index: index})
     },
     addTodo() {     
-      if (this.$refs.form.validate()) {
-        this.$store.dispatch('addTodo',this.toDoModel)     
+      let uli = `http://localhost:3001/addTodo`;      
+      if (this.$refs.form.validate()) {    
+        axios.post(uli, {todo: this.toDoModel});
+        this.$store.dispatch('addTodo',this.toDoModel)
       }          
     },
-    removeToDo(index) {
-      this.$store.dispatch('removeToDo', index )
+     removeToDo(index) {
+      let key = this.todos[index].id; 
+      let uli = `http://localhost:3001/deleteTodo`;     
+      axios.delete(uli, { data: { index: key } })
+      this.$store.dispatch('removeToDo', index )   
     }  
-  },
+  },  
   computed: {   
-    todos(){
+    todos(){      
       return this.$store.getters.todos
     }
   },
+  
 };
 </script>
 <style>

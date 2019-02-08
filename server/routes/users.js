@@ -9,8 +9,10 @@ router.use(function timeLog(req, res, next) {
 
 /* GET users listing. */
 router.get('/', async (req, res) => {
+  
   const todos = await client.query('SELECT * FROM todo', [])
   res.send(todos.rows);
+  console.log(todos)
 })
 
 module.exports = router;

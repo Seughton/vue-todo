@@ -8,21 +8,26 @@ export default new Vuex.Store({
     idForToDo: 3,
     todos: []
   },
-  mutations: {  
-    ADD_TODO(state, payload) {
-      state.todos.push({       
+  mutations: {
+    GET_TODOS_FROM_DB(state, payload){     
+      state.todos.push(payload);  
+    },  
+    ADD_TODO(state, payload) { 
+      state.todos[0].push({
+        id: 1,    
         title: payload,
         edit: false,
         done: false,
       })      
     },  
-    REMOVE_TODO(state, index) {
-      let todos = state.todos
-      todos.splice(index, 1)
+    REMOVE_TODO(state, index) {         
+      let todos = state.todos[0]     
+      todos.splice(index, 1)      
     },
     UPDATE_TODO(state, payload){
-      const todos = state.todos
-      todos.splice(payload.index, 1, {title: payload.todo, edit: false, done: false})
+      console.log("COME HERE")
+      
+      state.todos[0].splice(payload.index, 1, {id: '🔧',title: payload.todo, edit: false, done: false})
     },
     COMPLETE_TODO(state, payload){
       const todos = state.todos
@@ -33,17 +38,21 @@ export default new Vuex.Store({
     addTodo({ commit }, payload) {
       commit('ADD_TODO', payload)
     },
-    removeToDo({ commit }, index) {
+    removeToDo({ commit }, index) {     
       commit('REMOVE_TODO', index)
     },
-    update({ commit }, payload) {           
+    update({ commit }, payload) {  
+      console.log("GO NEXT")         
       commit('UPDATE_TODO', payload)
     },
     completeToDo({ commit }, payload){
       commit('COMPLETE_TODO', payload)
+    },
+    getTodosFromDB({ commit }, payload){      
+      commit('GET_TODOS_FROM_DB', payload)
     }
   },
   getters: {   
-    todos: state => state.todos.filter((todo) => { return !todo.completed }),    
+    todos: state => state.todos[0],    
   }
 })
