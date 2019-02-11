@@ -71,14 +71,16 @@ export default {
   },
   created() {
     this.getTodosFromDB()
-  },  
+  }, 
+   sockets: {
+      connect: function () {
+        console.log('socket connected')
+      },
+   }, 
   methods: {
-    async getTodosFromDB(){
-      let uli = `http://localhost:3001/todos`;
-      await axios.get(uli).then((response) => {
-        console.log('response.data',response.data)
-        let todos = response.data;
-        this.$store.dispatch('getTodosFromDB', todos)   
+    getTodosFromDB(){
+      this.$socket.emit('SOCKET_GET_TODOS_FROM_DB', null, (err, result) => {
+        this.$store.dispatch('getTodosFromDB', result) 
       })
     },
     editToDo(todo,index){
@@ -86,31 +88,27 @@ export default {
       this.index = index;
       this.edit = true     
     },
-    update(){   
-      let uli = `http://localhost:3001/updateTodo`;
-      if(this.toDoModel !== this.todos[this.index].title){       
-        axios.put(uli, { data: { index: this.todos[this.index].id, todo: this.toDoModel } })      
+    update(){
+      if(this.toDoModel !== this.todos[this.index].title){      
+        this.$socket.emit('SOCKET_UPDATE_TODO', { index: this.todos[this.index].id, todo: this.toDoModel });
         this.$store.dispatch('update', {index: this.index, todo: this.toDoModel})           
         this.edit = false;
         this.toDoModel = ''
       }
     },
-    completeToDo(isDone, index){   
-      let uli = `http://localhost:3001/doneTodo`;      
-      axios.put(uli, { data: {isDone: !isDone, index: this.todos[index].id}});
+    completeToDo(isDone, index){         
+      this.$socket.emit('SOCKET_COMPLETE_TODO', {isDone: !isDone, index: this.todos[index].id});
       this.$store.dispatch('completeToDo',{isDone: !isDone, index: index})
     },
-    addTodo() {       
-      let uli = `http://localhost:3001/addTodo`;      
+    addTodo() { 
       if (this.$refs.form.validate()) {    
-        axios.post(uli, {todo: this.toDoModel, id: `${(this.todos[this.todos.length - 1] + 1) || 1}`});
+        this.$socket.emit('SOCKET_ADD_TODO', this.toDoModel);
         this.$store.dispatch('addTodo',{todo: this.toDoModel, id: `${(this.todos[this.todos.length - 1] + 1) || 1}`})
       }          
     },
      removeToDo(index) {
       let key = this.todos[index].id; 
-      let uli = `http://localhost:3001/deleteTodo`;     
-      axios.delete(uli, { data: { index: key } })
+      this.$socket.emit('SOCKET_REMOVE_TODO', key)
       this.$store.dispatch('removeToDo', index )   
     }  
   },  
