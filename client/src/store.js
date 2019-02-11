@@ -13,9 +13,10 @@ export default new Vuex.Store({
       state.todos.push(payload);  
     },  
     ADD_TODO(state, payload) { 
+      console.log('payload' , payload)
       state.todos[0].push({
         id: 1,    
-        title: payload,
+        title: payload.todo,
         edit: false,
         done: false,
       })      
@@ -24,13 +25,11 @@ export default new Vuex.Store({
       let todos = state.todos[0]     
       todos.splice(index, 1)      
     },
-    UPDATE_TODO(state, payload){
-      console.log("COME HERE")
-      
+    UPDATE_TODO(state, payload){      
       state.todos[0].splice(payload.index, 1, {id: '🔧',title: payload.todo, edit: false, done: false})
     },
-    COMPLETE_TODO(state, payload){
-      const todos = state.todos
+    COMPLETE_TODO(state, payload){     
+      const todos = state.todos[0]
       todos[payload.index].done = !todos[payload.index].done 
     }
   },
@@ -41,8 +40,7 @@ export default new Vuex.Store({
     removeToDo({ commit }, index) {     
       commit('REMOVE_TODO', index)
     },
-    update({ commit }, payload) {  
-      console.log("GO NEXT")         
+    update({ commit }, payload) {         
       commit('UPDATE_TODO', payload)
     },
     completeToDo({ commit }, payload){

@@ -37,7 +37,7 @@
       <tr :class="{selected: props.item.done}" :key="props.index"> 
         <td class="text-xs-left">
         <span class="index-padding">
-          {{todos[props.index].id}}
+          {{props.index + 1}}
         </span>
           {{props.item.title}}      
         </td>
@@ -95,14 +95,16 @@ export default {
         this.toDoModel = ''
       }
     },
-    completeToDo(isDone, index){     
-      this.$store.dispatch('completeToDo',{isDone: isDone, index: index})
+    completeToDo(isDone, index){   
+      let uli = `http://localhost:3001/doneTodo`;      
+      axios.put(uli, { data: {isDone: !isDone, index: this.todos[index].id}});
+      this.$store.dispatch('completeToDo',{isDone: !isDone, index: index})
     },
-    addTodo() {     
+    addTodo() {       
       let uli = `http://localhost:3001/addTodo`;      
       if (this.$refs.form.validate()) {    
-        axios.post(uli, {todo: this.toDoModel});
-        this.$store.dispatch('addTodo',this.toDoModel)
+        axios.post(uli, {todo: this.toDoModel, id: `${(this.todos[this.todos.length - 1] + 1) || 1}`});
+        this.$store.dispatch('addTodo',{todo: this.toDoModel, id: `${(this.todos[this.todos.length - 1] + 1) || 1}`})
       }          
     },
      removeToDo(index) {

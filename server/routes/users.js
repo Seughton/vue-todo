@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
   
   const todos = await client.query('SELECT * FROM todo', [])
   res.send(todos.rows);
-  console.log(todos)
+
 })
 
 module.exports = router;
