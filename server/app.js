@@ -21,15 +21,15 @@ app.use(cors())
 
 
 io.on('connection', (socket) => {
-  socket.on('SOCKET_ADD_TODO', async (data, cb) =>  {    
-    const result = await client.query('INSERT INTO todo (title) VALUES ($1) RETURNING id;', [data]);
+  socket.on('SOCKET_ADD_TODO', async (data, cb) =>  {        
+    const result = await client.query('INSERT INTO todo (title,date) VALUES ($1, $2) RETURNING id;', [data.todo, data.date]);
     cb({id: result.rows[0].id})
   })
   socket.on('SOCKET_REMOVE_TODO', async(payload) => {
     await client.query('DELETE FROM todo WHERE id IN ($1)',[payload]);
   })
   socket.on('SOCKET_GET_TODOS_FROM_DB', async(data, cb) => {     
-    const result = await client.query('SELECT * FROM todo', [])    
+    const result = await client.query('SELECT * FROM todo ORDER BY date ASC LIMIT 16 OFFSET $1', [data||null])   
     cb(result.rows)
   })
   socket.on('SOCKET_UPDATE_TODO', async (data, cb) => {    

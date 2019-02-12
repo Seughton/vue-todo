@@ -11,14 +11,15 @@ export default new Vuex.Store({
   },
   mutations: {
     SOCKET_GET_TODOS_FROM_DB(state, payload) {
-      state.todos = [...payload];
+      state.todos.push(...payload)
     },
-    SOCKET_ADD_TODO(state, payload) {
+    SOCKET_ADD_TODO(state, payload) {     
       state.todos.push({
         id: payload.id,
         title: payload.todo,
         edit: false,
         done: false,
+        date: payload.date
       })
     },
     SOCKET_REMOVE_TODO(state, index) {

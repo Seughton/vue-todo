@@ -7,7 +7,9 @@
           :rules="toDoRules"
           v-model="toDoModel"
           @keyup.enter.prevent="addTodo"
+          ref="addTodoInput"
           placeholder="I need to..."
+          autofocus
           required
         ></v-text-field>
       </v-form>
@@ -45,6 +47,8 @@ export default {
     return {
       edit: false,
       valid: false,
+      bottom: false,
+      offset: 0,
       index: -1,
       toDoRules: [
         v => !!v || `Enter yours task`,
@@ -54,6 +58,9 @@ export default {
     };
   },
   created() {
+    window.addEventListener("scroll", () => {
+      this.bottom = this.bottomVisible();
+    });
     this.getTodosFromDB();
   },
   sockets: {
@@ -62,18 +69,38 @@ export default {
     }
   },
   methods: {
-    getTodosFromDB() {
-      this.$socket.emit("SOCKET_GET_TODOS_FROM_DB", null, (result, err) => {
-        this.$store.dispatch("getTodosFromDB", result);
-      });
+    createTime() {
+      let tzoffset = new Date().getTimezoneOffset() * 60000; //offset in milliseconds
+      let localISOTime = new Date(Date.now() - tzoffset)
+        .toISOString()
+        .slice(0, -1);
+      return localISOTime;
+    },
+    bottomVisible() {
+      const scrollY = window.scrollY;
+      const visible = document.documentElement.clientHeight;
+      const pageHeight = document.documentElement.scrollHeight;
+      const bottomOfPage = visible + scrollY >= pageHeight;
+      return bottomOfPage || pageHeight < visible;
+    },
+    getTodosFromDB(offset) {
+      this.$socket.emit(
+        "SOCKET_GET_TODOS_FROM_DB",
+        null || offset,
+        (result, err) => {
+          this.offset += 16;
+          this.$store.dispatch("getTodosFromDB", [...result]);
+        }
+      );
     },
     editToDo(todo, index) {
+      this.$refs.addTodoInput.focus()
       this.toDoModel = todo;
       this.index = index;
       this.edit = true;
     },
     update() {
-      if (this.toDoModel !== this.todos[this.index].title) {     
+      if (this.toDoModel !== this.todos[this.index].title) {
         this.$socket.emit(
           "SOCKET_UPDATE_TODO",
           { id: this.todos[this.index].id, todo: this.toDoModel },
@@ -99,14 +126,19 @@ export default {
       this.$store.dispatch("completeToDo", { isDone: !isDone, index: index });
     },
     addTodo() {
-      console.log("TODOS IS", this.todos);
       if (this.$refs.form.validate()) {
-        this.$socket.emit("SOCKET_ADD_TODO", this.toDoModel, (result, err) => {
-          this.$store.dispatch("addTodo", {
-            todo: this.toDoModel,
-            id: result.id
-          });
-        });
+        console.log(this.todos);
+        this.$socket.emit(
+          "SOCKET_ADD_TODO",
+          { todo: this.toDoModel, date: this.createTime() },
+          (result, err) => {
+            this.$store.dispatch("addTodo", {
+              todo: this.toDoModel,
+              id: result.id,
+              date: this.createTime()
+            });
+          }
+        );
       }
     },
     removeToDo(index) {
@@ -118,6 +150,13 @@ export default {
   computed: {
     todos() {
       return this.$store.getters.todos.sort((a, b) => a.id - b.id);
+    }
+  },
+  watch: {
+    bottom(bottom) {
+      if (bottom) {
+        this.getTodosFromDB(this.offset);
+      }
     }
   }
 };
